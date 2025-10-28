@@ -26,6 +26,5 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
-RUN npx prisma migrate deploy
+CMD npx prisma migrate deploy && node dist/server.js
 
-CMD ["node", "dist/server.js"]
