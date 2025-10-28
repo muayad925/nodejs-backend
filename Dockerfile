@@ -1,18 +1,29 @@
-# ---------- Dev environment ----------
-FROM node:22-alpine
+# ---------- Stage 1: Build ----------
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Copy package files first for caching
 COPY package*.json ./
-
-# Install ALL dependencies (including dev)
+# Install dev dependencies too for build tools (tsc, tsc-alias)
 RUN npm install
 
-# Copy everything else
 COPY . .
 
-# Expose your app port
-EXPOSE 3000
+# Generate Prisma client and compile TypeScript
+RUN npx prisma generate
+RUN npm run build
 
-# Default command for dev mode (hot reload)
-CMD ["npm", "run", "dev"]
+# ---------- Stage 2: Production Runtime ----------
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/prisma ./prisma
+
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
