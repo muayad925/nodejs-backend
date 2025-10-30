@@ -6,8 +6,10 @@ import cors from "cors";
 import routes from "./routes/index.js";
 import streamRoutes from "./routes/streamRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import stripeWebhook from "./routes/stripeWebhook.js";
 
 const app: Application = express();
+app.use("/webhook", stripeWebhook);
 
 // Middleware
 app.use(cors());

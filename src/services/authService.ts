@@ -3,6 +3,8 @@ import jwt, { type Secret } from "jsonwebtoken";
 import { UserRepository } from "../repositories/userRepository.js";
 import { TokenRepository } from "../repositories/tokenRepository.js";
 import { emailQueue, type WelcomeJob } from "../queues/emailQueue.js";
+import { stripe } from "../config/stripe.js";
+import prisma from "../config/db.js";
 
 const accessSecret = process.env.JWT_ACCESS_SECRET!;
 const refreshSecret = process.env.JWT_REFRESH_SECRET!;
@@ -13,13 +15,35 @@ export class AuthService {
   private userRepo = new UserRepository();
   private tokenRepo = new TokenRepository();
 
-  async register(name: string, email: string, password: string) {
+  async register(
+    firstName: string,
+    lastName: string,
+    gender: string,
+    email: string,
+    password: string
+  ) {
     const existing = await this.userRepo.findByEmail(email);
     if (existing) throw new Error("Email already in use");
 
     const hashed = await bcrypt.hash(password, 12);
-    const user = await this.userRepo.create({ name, email, password: hashed });
-    const jobData: WelcomeJob = { userId: user.id, email, name };
+    const user = await this.userRepo.create({
+      firstName,
+      lastName,
+      gender,
+      email,
+      password: hashed,
+    });
+    const stripeCustomer = await stripe.customers.create({
+      email: user.email,
+      name: `${user.firstName} ${user.lastName}`,
+      metadata: { userId: user.id }, // helps cross-reference later
+    });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { stripeCustomerId: stripeCustomer.id },
+    });
+
+    const jobData: WelcomeJob = { userId: user.id, email, name: firstName };
     await emailQueue.add("welcomeEmail", jobData);
 
     const tokens = this.generateTokens({ userId: user.id });

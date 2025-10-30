@@ -1,4 +1,4 @@
-import type { Role } from "@prisma/client";
+import type { Role, Gender } from "@prisma/client";
 import { UserRepository } from "../repositories/userRepository.js";
 
 export class UserService {
@@ -20,7 +20,9 @@ export class UserService {
   }
 
   async createUser(data: {
-    name: string;
+    firstName: string;
+    lastName: string;
+    gender: Gender;
     email: string;
     password: string;
     role?: Role;

@@ -1,5 +1,5 @@
 import prisma from "../config/db.js";
-import type { Role, User } from "@prisma/client";
+import type { Role, User, Gender } from "@prisma/client";
 
 export class UserRepository {
   async findByEmail(email: string): Promise<User | null> {
@@ -11,7 +11,9 @@ export class UserRepository {
   }
 
   async create(data: {
-    name: string;
+    firstName: string;
+    lastName: string;
+    gender: Gender;
     email: string;
     password: string;
     role?: Role;
