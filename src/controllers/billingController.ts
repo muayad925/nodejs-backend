@@ -1,10 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
 import { ensureStripeCustomer } from "../services/billingService.js";
 import { stripe } from "../config/stripe.js";
+import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 
 export class BillingController {
   static async createCheckoutSession(
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
   ) {
@@ -13,7 +14,6 @@ export class BillingController {
       if (!priceId)
         return res.status(400).json({ message: "priceId is required" });
       if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-
       const customerId = await ensureStripeCustomer(req.user.id);
 
       const session = await stripe.checkout.sessions.create({

@@ -19,6 +19,7 @@ router.post("/logout", requireAuth, logout);
 router.get("/me", requireAuth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
+      // @ts-ignore
       where: { id: req.user.id },
       select: {
         id: true,
