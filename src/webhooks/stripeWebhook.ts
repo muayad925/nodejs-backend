@@ -21,12 +21,11 @@ router.post(
       if (event.type.startsWith("customer.subscription.")) {
         const sub = event.data.object as Stripe.Subscription;
         const customerId = sub.customer as string;
-        console.log(sub.customer);
         const user = await prisma.user.findFirst({
           where: { stripeCustomerId: customerId },
           select: { id: true },
         });
-        console.log(user);
+
         if (user) {
           await prisma.subscription.upsert({
             where: { stripeSubscriptionId: sub.id },
