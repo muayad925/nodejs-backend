@@ -8,7 +8,7 @@ export async function ensureStripeCustomer(userId: number) {
   if (user.stripeCustomerId) return user.stripeCustomerId;
 
   const customer = await stripe.customers.create({
-    email: user.email,
+    email: user.email || undefined,
     metadata: { userId: String(user.id) },
   });
 

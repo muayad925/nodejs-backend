@@ -17,6 +17,7 @@ export class UserRepository {
     email: string;
     password: string;
     role?: Role;
+    supabaseAuthId: string;
   }) {
     return prisma.user.create({ data });
   }
