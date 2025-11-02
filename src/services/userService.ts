@@ -26,6 +26,7 @@ export class UserService {
     email: string;
     password: string;
     role?: Role;
+    supabaseAuthId: string;
   }) {
     return this.repo.create(data);
   }
