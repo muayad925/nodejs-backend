@@ -2,6 +2,7 @@ import { Router } from "express";
 import prisma from "../config/db.js";
 import { Webhook } from "standardwebhooks";
 import express from "express";
+import { stripe } from "../config/stripe.js";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.post(
       // @ts-ignore
       const { user } = wh.verify(req.body, req.headers);
 
-      await prisma.user.upsert({
+      const localUser = await prisma.user.upsert({
         where: { supabaseAuthId: user.id },
         create: {
           supabaseAuthId: user.id,
@@ -31,6 +32,17 @@ router.post(
           firstName: user.user_metadata?.firstName ?? null,
           lastName: user.user_metadata?.lastName ?? null,
         },
+      });
+
+      const stripeCustomer = await stripe.customers.create({
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        metadata: { userId: user.id },
+      });
+
+      await prisma.user.update({
+        where: { id: localUser.id },
+        data: { stripeCustomerId: stripeCustomer.id },
       });
 
       return res.status(200).json({ status: "ok" });

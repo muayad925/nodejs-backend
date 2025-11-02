@@ -25,7 +25,7 @@ router.post(
           where: { stripeCustomerId: customerId },
           select: { id: true },
         });
-        console.log(user);
+
         if (user) {
           await prisma.subscription.upsert({
             where: { stripeSubscriptionId: sub.id },

@@ -6,8 +6,8 @@ import cors from "cors";
 import routes from "./routes/index.js";
 import streamRoutes from "./routes/streamRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
-import stripeWebhook from "./routes/stripeWebhook.js";
-import syncWebhook from "./routes/authWebhook.js";
+import stripeWebhook from "./webhooks/stripeWebhook.js";
+import syncWebhook from "./webhooks/authWebhook.js";
 
 const app: Application = express();
 app.use("/auth/sync", syncWebhook);
