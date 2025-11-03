@@ -6,6 +6,6 @@ import { authorize } from "../middlewares/authorize.js";
 const router = Router();
 
 // GET /api/users
-router.get("/", requireAuth, authorize(["ADMIN"]), UserController.getAllUsers);
+router.get("/", requireAuth, UserController.getAllUsers);
 
 export default router;
