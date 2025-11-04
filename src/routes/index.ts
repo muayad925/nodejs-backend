@@ -1,5 +1,5 @@
 import { Router } from "express";
-import userRoutes from "./users.js";
+import userRoutes from "./userRoutes.js";
 import streamRoutes from "./streamRoutes.js";
 import billingRouter from "./billingRoutes.js";
 

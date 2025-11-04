@@ -10,6 +10,10 @@ export class UserRepository {
     return prisma.user.findUnique({ where: { id } });
   }
 
+  async findBySupabaseAuthId(supabaseAuthId: string): Promise<User | null> {
+    return prisma.user.findUnique({ where: { supabaseAuthId } });
+  }
+
   async create(data: {
     firstName: string;
     lastName: string;

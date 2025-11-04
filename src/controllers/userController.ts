@@ -1,20 +1,14 @@
 // src/controllers/userController.ts
 import type { Response, NextFunction } from "express";
-import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 import { logger } from "../utils/logger.js";
 import { UserService } from "../services/userService.js";
 import { UserRepository } from "../repositories/userRepository.js";
-import { emailQueue, type WelcomeJob } from "../queues/emailQueue.js";
 
 const userRepo = new UserRepository();
 const userService = new UserService(userRepo);
 
 export class UserController {
-  static async getAllUsers(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  static async getAllUsers(req: any, res: Response, next: NextFunction) {
     try {
       const users = await userService.getAll();
       logger.info(
@@ -28,13 +22,9 @@ export class UserController {
     }
   }
 
-  static async getProfile(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  static async getProfile(req: any, res: Response, next: NextFunction) {
     try {
-      const userId = req.user?.id; // assuming the logged-in user
+      const userId = req.user.id; // assuming the logged-in user
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }

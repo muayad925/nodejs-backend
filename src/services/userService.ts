@@ -13,8 +13,8 @@ export class UserService {
     return this.repo.list();
   }
 
-  async getUserProfile(id: number) {
-    const user = await this.repo.findById(id);
+  async getUserProfile(id: string) {
+    const user = await this.repo.findBySupabaseAuthId(id);
     if (!user) throw new Error("User not found");
     return user;
   }
