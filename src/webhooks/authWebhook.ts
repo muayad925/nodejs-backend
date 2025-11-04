@@ -18,6 +18,8 @@ router.post(
       const wh = new Webhook(secret);
       // @ts-ignore
       const { user } = wh.verify(req.body, req.headers);
+      const firstName = user.user_metadata?.firstName ?? "";
+      const lastName = user.user_metadata?.lastName ?? "";
 
       const localUser = await prisma.user.upsert({
         where: { supabaseAuthId: user.id },
@@ -29,15 +31,15 @@ router.post(
         },
         update: {
           email: user.email,
-          firstName: user.user_metadata?.firstName ?? null,
-          lastName: user.user_metadata?.lastName ?? null,
+          firstName: firstName,
+          lastName: lastName,
         },
       });
 
       const stripeCustomer = await stripe.customers.create({
         email: user.email,
-        name: `${user.firstName} ${user.lastName}`,
-        metadata: { userId: user.id },
+        name: `${firstName} ${lastName}`,
+        metadata: { userId: localUser.id },
       });
 
       await prisma.user.update({

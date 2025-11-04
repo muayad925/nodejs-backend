@@ -1,8 +1,10 @@
 import prisma from "../config/db.js";
 import { stripe } from "../config/stripe.js";
 
-export async function ensureStripeCustomer(userId: number) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+export async function ensureStripeCustomer(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { supabaseAuthId: userId },
+  });
   if (!user) throw new Error("User not found");
 
   if (user.stripeCustomerId) return user.stripeCustomerId;

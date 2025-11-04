@@ -11,7 +11,7 @@ import syncWebhook from "./webhooks/authWebhook.js";
 
 const app: Application = express();
 app.use("/auth/sync", syncWebhook);
-app.use("/webhook", stripeWebhook);
+app.use("/stripe/sync", stripeWebhook);
 
 // Middleware
 app.use(cors());

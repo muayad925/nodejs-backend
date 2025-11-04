@@ -15,7 +15,7 @@ router.post(
       const event = stripe.webhooks.constructEvent(
         req.body as Buffer,
         sig as string,
-        process.env.STRIPE_WEBHOOK_SERCRET!
+        process.env.STRIPE_WEBHOOK_SECRET!
       );
 
       if (event.type.startsWith("customer.subscription.")) {
