@@ -11,10 +11,34 @@ export class BillingController {
   ) {
     try {
       const { priceId } = req.body; // your Stripe Price ID
+      const supabaseUserId = req.user.id;
+
       if (!priceId)
         return res.status(400).json({ message: "priceId is required" });
       if (!req.user) return res.status(401).json({ message: "Unauthorized" });
-      const customerId = await ensureStripeCustomer(req.user.id);
+      const customerId = await ensureStripeCustomer(supabaseUserId);
+
+      const user = await prisma.user.findUnique({
+        where: { supabaseAuthId: supabaseUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const existing = await prisma.subscription.findFirst({
+        where: {
+          userId: user.id,
+          status: { in: ["active", "trialing", "past_due", "unpaid"] },
+        },
+      });
+
+      if (existing) {
+        return res
+          .status(400)
+          .json({ error: "User already has an active subscription" });
+      }
 
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
@@ -50,6 +74,27 @@ export class BillingController {
         orderBy: { createdAt: "desc" },
       });
       return res.json(sub);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async createPortalSession(
+    req: any,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const supabaseUserId = req.user.id;
+      if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+      const customerId = await ensureStripeCustomer(supabaseUserId);
+
+      const session = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${process.env.PUBLIC_URL}/account`,
+      });
+
+      return res.json({ url: session.url });
     } catch (err) {
       next(err);
     }
