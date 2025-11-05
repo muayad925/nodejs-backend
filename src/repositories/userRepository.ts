@@ -1,5 +1,5 @@
 import prisma from "../config/db.js";
-import type { Role, User, Gender } from "@prisma/client";
+import type { Role, User } from "@prisma/client";
 
 export class UserRepository {
   async findByEmail(email: string): Promise<User | null> {
@@ -17,13 +17,17 @@ export class UserRepository {
   async create(data: {
     firstName: string;
     lastName: string;
-    gender: Gender;
+    gender: string;
     email: string;
-    password: string;
+    age: number;
     role?: Role;
     supabaseAuthId: string;
   }) {
     return prisma.user.create({ data });
+  }
+
+  async update(id: string, data: Partial<User>) {
+    return prisma.user.update({ where: { supabaseAuthId: id }, data });
   }
 
   async list(): Promise<User[]> {

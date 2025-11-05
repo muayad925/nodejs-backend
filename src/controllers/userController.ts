@@ -3,6 +3,7 @@ import type { Response, NextFunction } from "express";
 import { logger } from "../utils/logger.js";
 import { UserService } from "../services/userService.js";
 import { UserRepository } from "../repositories/userRepository.js";
+import { supabase } from "../config/supabase.js";
 
 const userRepo = new UserRepository();
 const userService = new UserService(userRepo);
@@ -36,6 +37,33 @@ export class UserController {
       logger.error(
         { err, userId: req.user?.id },
         "Failed to fetch user profile"
+      );
+      next(err);
+    }
+  }
+
+  static async updateProfile(req: any, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user.id; // assuming the logged-in user
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await userService.updateUserProfile(userId, req.body);
+      const { error } = await supabase.auth.admin.updateUserById(req.user.id, {
+        user_metadata: {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+        },
+      });
+
+      if (error) console.error("Supabase metadata sync failed:", error.message);
+
+      logger.info({ userId }, "Updated user profile");
+      res.json(user);
+    } catch (err) {
+      logger.error(
+        { err, userId: req.user?.id },
+        "Failed to update user profile"
       );
       next(err);
     }

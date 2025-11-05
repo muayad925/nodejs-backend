@@ -1,4 +1,4 @@
-import type { Role, Gender } from "@prisma/client";
+import type { Role, User } from "@prisma/client";
 import { UserRepository } from "../repositories/userRepository.js";
 
 export class UserService {
@@ -22,12 +22,17 @@ export class UserService {
   async createUser(data: {
     firstName: string;
     lastName: string;
-    gender: Gender;
+    gender: string;
     email: string;
+    age: number;
     password: string;
     role?: Role;
     supabaseAuthId: string;
   }) {
     return this.repo.create(data);
+  }
+
+  async updateUserProfile(id: string, data: Partial<User>) {
+    return this.repo.update(id, data);
   }
 }
